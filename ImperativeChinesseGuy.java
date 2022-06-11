@@ -1,31 +1,46 @@
 import java.util.Random;
 import java.util.Scanner;
 
-public class ImperativeChinesseGuy {
+public class S26525_p02 {
     static char[] Map = new char[40];
     static Random r = new Random();
     static Scanner scan = new Scanner(System.in);
-    static int[] players = new int[] {0,0,0,0}, scores = new int[] {0,0,0,0};
+    static int[] players = new int[]{0, 0, 0, 0}, scores = new int[]{0, 0, 0, 0};
+    static int playerCount;
 
     public static void main(String[] args) {
         fillOutMap();
-        System.out.println("Enter player count [1-4]: ");
-        int playerCount = scan.nextInt();
-        start(playerCount);
+        start(
+                3,
+                new int[][]{
+                        {'a', 4},
+                        {'b', 13},
+                        {'c', 23},
+                        {'a', 30},
+                        {'b', 38},
+                        {'c', 25}
+                },
+                new int[]{4, 2, 5, 2, 4, 5},
+                new int[]{4, 13, 23, 30, 38, 25});
+        // start();     Podstawowa funkcja do uruchomienia gry
     }
 
-    static void start(int playerCount) {
+    static void start() {
         int roll, intput;
         String input;
         boolean gameEnd = false, turnEnd, moveEnd;
-        fillOutPlayers(playerCount);
-        scan.nextLine();
+        if (playerCount <= 0) {
+            System.out.println("Enter player count [1-4]: ");
+            playerCount = scan.nextInt();
+            scan.nextLine();
+            fillOutPlayers(playerCount);
+        }
         while (!gameEnd) {
-            for (int i = 0; i < playerCount; i++) {
+            for (int i = 0; i < playerCount && !checkIfGameEnd(playerCount); i++) {
                 turnEnd = false;
                 while (!turnEnd) {
                     if (players[i] == 0 && scores[i] == 4) break;
-                    System.out.printf("Player %d turn %n", i+1);
+                    System.out.printf("Player %d turn %n", i + 1);
                     printMap();
                     roll = roll();
                     System.out.println("Roll: " + roll);
@@ -35,65 +50,54 @@ public class ImperativeChinesseGuy {
                         players[i]--;
                         System.out.println("Placed new pawn. Press [Enter] to continue...");
                         scan.nextLine();
-                    }
-                    else if (roll != 6 && players[i] + scores[i] == 4) {
+                    } else if (roll != 6 && players[i] + scores[i] == 4) {
                         System.out.println("No action possible. Press [Enter] to continue...");
                         scan.nextLine();
                         turnEnd = true;
-                    }
-                    else if (roll == 6 && isPawnOfPlayerOnIndex(0, getStartingIndexByPlayer(i))) {
+                    } else if (roll == 6 && isPawnOfPlayerOnIndex(getStartingIndexByPlayer(i), i)) {
                         while (!moveEnd) {
                             System.out.println("Enter position of pawn that you want to move with:");
                             intput = scan.nextInt();
                             scan.nextLine();
-                            if (isPawnOfPlayerOnIndex(intput%40, i)) {
-                                if (shouldAddPoint(i, intput, (intput+roll)%40)){
+                            if (isPawnOfPlayerOnIndex(intput % 40, i)) {
+                                if (shouldAddPoint(i, intput, (intput + roll) % 40)) {
                                     scores[i]++;
                                     Map[intput] = 'x';
                                     break;
-                                }
-                                else if (!isIndexFree((intput+roll)%40)){
-                                    if (isPawnOfPlayerOnIndex((intput+roll)%40, i)) {
+                                } else if (!isIndexFree((intput + roll) % 40)) {
+                                    if (isPawnOfPlayerOnIndex((intput + roll) % 40, i)) {
                                         System.out.println("You can't kill your own pawn!");
                                         break;
-                                    }
-                                    else
-                                        removePawnFromIndex((intput+roll)%40);
+                                    } else
+                                        removePawnFromIndex((intput + roll) % 40);
                                 }
-                                movePawn(intput, (intput+roll)%40, i);
+                                movePawn(intput, (intput + roll) % 40, i);
                                 moveEnd = true;
-                            }
-                            else System.out.println("Wrong position provided!");
+                            } else System.out.println("Wrong position provided!");
                         }
-                    }
-                    else if (roll == 6 && players[i] == 0) {
+                    } else if (roll == 6 && players[i] == 0) {
                         while (!moveEnd) {
                             System.out.println("Enter position of pawn that you want to move with:");
                             intput = scan.nextInt();
                             scan.nextLine();
-                            if (isPawnOfPlayerOnIndex(intput%40, i)) {
-                                if (shouldAddPoint(i, intput, (intput+roll)%40)){
+                            if (isPawnOfPlayerOnIndex(intput % 40, i)) {
+                                if (shouldAddPoint(i, intput, (intput + roll) % 40)) {
                                     scores[i]++;
                                     Map[intput] = 'x';
                                     break;
-                                }
-                                else if (!isIndexFree((intput+roll)%40)){
-                                    if (isPawnOfPlayerOnIndex((intput+roll)%40, i)) {
+                                } else if (!isIndexFree((intput + roll) % 40)) {
+                                    if (isPawnOfPlayerOnIndex((intput + roll) % 40, i)) {
                                         System.out.println("You can't kill your own pawn");
                                         break;
-                                    }
-                                    else {
-                                        removePawnFromIndex((intput+roll)%40);
+                                    } else {
+                                        removePawnFromIndex((intput + roll) % 40);
                                     }
                                 }
-                                movePawn(intput, (intput+roll)%40, i);
+                                movePawn(intput, (intput + roll) % 40, i);
                                 moveEnd = true;
-                            }
-                            else System.out.println("Wrong position provided!");
+                            } else System.out.println("Wrong position provided!");
                         }
-                    }
-
-                    else if (roll == 6 && players[i] + scores[i] < 4) {
+                    } else if (roll == 6 && players[i] + scores[i] < 4) {
                         System.out.println("Would you like to place a new pawn? (y/n)");
                         input = scan.nextLine();
                         if (input.equals("y")) {
@@ -101,58 +105,50 @@ public class ImperativeChinesseGuy {
                             players[i]--;
                             System.out.println("Placed new pawn. Press [Enter] to continue...");
                             scan.nextLine();
-                        }
-                        else {
+                        } else {
                             while (!moveEnd) {
                                 System.out.println("Enter position of pawn that you want to move with:");
                                 intput = scan.nextInt();
                                 scan.nextLine();
-                                if (isPawnOfPlayerOnIndex(intput%40, i)) {
-                                    if (shouldAddPoint(i, intput, (intput+roll)%40)){
+                                if (isPawnOfPlayerOnIndex(intput % 40, i)) {
+                                    if (shouldAddPoint(i, intput, (intput + roll) % 40)) {
                                         scores[i]++;
                                         Map[intput] = 'x';
                                         break;
-                                    }
-                                    else if (!isIndexFree((intput+roll)%40)){
-                                        if (isPawnOfPlayerOnIndex((intput+roll)%40, i)) {
+                                    } else if (!isIndexFree((intput + roll) % 40)) {
+                                        if (isPawnOfPlayerOnIndex((intput + roll) % 40, i)) {
                                             System.out.println("You can't kill your own pawn");
                                             break;
-                                        }
-                                        else {
-                                            removePawnFromIndex((intput+roll)%40);
+                                        } else {
+                                            removePawnFromIndex((intput + roll) % 40);
                                         }
                                     }
-                                    movePawn(intput, (intput+roll)%40, i);
+                                    movePawn(intput, (intput + roll) % 40, i);
                                     moveEnd = true;
-                                }
-                                else System.out.println("Wrong position provided!");
+                                } else System.out.println("Wrong position provided!");
                             }
                         }
-                    }
-                    else if (roll != 6 && players[i] + scores[i] < 4) {
+                    } else if (roll != 6 && players[i] + scores[i] < 4) {
                         while (!moveEnd) {
                             System.out.println("Enter position of pawn that you want to move with:");
                             intput = scan.nextInt();
                             scan.nextLine();
-                            if (isPawnOfPlayerOnIndex(intput%40, i)) {
-                                if (shouldAddPoint(i, intput, (intput+roll)%40)){
+                            if (isPawnOfPlayerOnIndex(intput % 40, i)) {
+                                if (shouldAddPoint(i, intput, (intput + roll) % 40)) {
                                     scores[i]++;
                                     Map[intput] = 'x';
                                     break;
-                                }
-                                else if (!isIndexFree((intput+roll)%40)){
-                                    if (isPawnOfPlayerOnIndex((intput+roll)%40, i)) {
+                                } else if (!isIndexFree((intput + roll) % 40)) {
+                                    if (isPawnOfPlayerOnIndex((intput + roll) % 40, i)) {
                                         System.out.println("You can't kill your own pawn!");
                                         break;
-                                    }
-                                    else {
-                                        removePawnFromIndex((intput+roll)%40);
+                                    } else {
+                                        removePawnFromIndex((intput + roll) % 40);
                                     }
                                 }
-                                movePawn(intput, (intput+roll)%40, i);
+                                movePawn(intput, (intput + roll) % 40, i);
                                 moveEnd = true;
-                            }
-                            else System.out.println("Wrong position provided!");
+                            } else System.out.println("Wrong position provided!");
                         }
                         turnEnd = true;
                         if (scores[i] == 4) {
@@ -161,19 +157,46 @@ public class ImperativeChinesseGuy {
                         }
                     }
                 }
+                printScores(playerCount);
             }
-            printScores(playerCount);
-            if (checkIfGameEnd(playerCount)) gameEnd = true;
+            if (checkIfGameEnd(playerCount))
+                gameEnd = true;
         }
     }
 
-    static void start(int playerCount, int[][] gameState, int[] rolls, int[] decisions) {
+    static void start(int playerCount_, int[][] gameState, int[] rolls, int[] decisions) {
+        playerCount = playerCount_;
+        fillOutPlayers(playerCount);
+        updateMap(gameState);
+        processRolls(rolls, decisions);
+        start();
+    }
 
+    static void processRolls(int[] rolls, int[] decisions) {
+        for (int i = 0; i < rolls.length; i++) {
+            if (shouldAddPoint(getPlayerFromPawn(getPawnByIndex(decisions[i])), decisions[i],
+                    (decisions[i] + rolls[i]) % 40)) {
+                scores[getPlayerFromPawn(getPawnByIndex(decisions[i]))]++;
+                Map[decisions[i]] = 'x';
+            } else
+                movePawn(decisions[i], (decisions[i] + rolls[i]) % 40,
+                        getPlayerFromPawn(getPawnByIndex(decisions[i])));
+        }
+    }
+
+    static char getPawnByIndex(int index) {
+        return Map[index];
+    }
+
+    static void updateMap(int[][] gameState) {
+        for (int[] pawn : gameState) {
+            players[getPlayerFromPawn((char) pawn[0])]--;
+            Map[pawn[1]] = (char) pawn[0];
+        }
     }
 
     static int roll() {
-        //return r.nextInt(7 - 1) + 1;
-        return 6;
+        return r.nextInt(6) + 1;
     }
 
     static boolean isIndexFree(int index) {
@@ -182,6 +205,18 @@ public class ImperativeChinesseGuy {
 
     static boolean isPawnOfPlayerOnIndex(int index, int player) {
         return Map[index] == getPawnByPlayer(player);
+    }
+
+    static int getPlayerFromPawn(char pawn) {
+        int player;
+        switch (pawn) {
+            case 'a' -> player = 0;
+            case 'b' -> player = 1;
+            case 'c' -> player = 2;
+            case 'd' -> player = 3;
+            default -> player = -1;
+        }
+        return player;
     }
 
     static void removePawnFromIndex(int index) {
@@ -196,7 +231,7 @@ public class ImperativeChinesseGuy {
 
     static int getStartingIndexByPlayer(int player) {
         int index;
-        switch (player){
+        switch (player) {
             case 0 -> index = 0;
             case 1 -> index = 10;
             case 2 -> index = 20;
@@ -209,25 +244,27 @@ public class ImperativeChinesseGuy {
     static void printScores(int playerCount) {
         System.out.println("###########################");
         System.out.println("#         SCORES          #");
-        System.out.println("# Player 1: " + scores[0] + "             #");
-        if (playerCount > 1) System.out.println("# Player 2: " + scores[1] + "             #");
-        if (playerCount > 2) System.out.println("# Player 3: " + scores[2] + "             #");
-        if (playerCount > 3) System.out.println("# Player 4: " + scores[3] + "             #");
+        System.out.println("# Player 1 (a): " + scores[0] + "         #");
+        if (playerCount > 1) System.out.println("# Player 2 (b): " + scores[1] + "         #");
+        if (playerCount > 2) System.out.println("# Player 3 (c): " + scores[2] + "         #");
+        if (playerCount > 3) System.out.println("# Player 4 (d): " + scores[3] + "         #");
         System.out.println("###########################");
     }
+
     static boolean shouldAddPoint(int player, int indexFrom, int indexTo) {
         int startingIndex = getStartingIndexByPlayer(player);
         if (player == 0) {
             return (indexFrom >= 34 && indexFrom <= 39 && indexTo >= 0 && indexTo <= 5);
-        }
-        else {
+        } else {
             return (indexFrom < startingIndex && indexTo >= startingIndex);
         }
     }
+
     static void movePawn(int indexFrom, int indexTo, int player) {
         Map[indexFrom] = 'x';
         Map[indexTo] = getPawnByPlayer(player);
     }
+
     static void placeNewPawn(int player) {
         switch (player) {
             case 0 -> Map[0] = 'a';
@@ -252,14 +289,17 @@ public class ImperativeChinesseGuy {
     static void printPawn(int index) {
         System.out.print(Map[index]);
     }
+
     static boolean checkIfGameEnd(int playerCount) {
         int playerEnd = 0;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < playerCount; i++) {
             if (scores[i] == 4) playerEnd++;
         }
         if (playerCount == 1 && playerEnd == 1) return true;
-        else return playerCount > 1 && playerCount - playerEnd == 1;
+        else
+            return (playerCount > 1) && ((playerCount - playerEnd) == 1);
     }
+
     static void fillOutMap() {
         for (int i = 0; i < 40; i++)
             Map[i] = 'x';
@@ -283,8 +323,8 @@ public class ImperativeChinesseGuy {
         printString("0");
         System.out.println();
         printSpace(3);
-        printString( players[3] >= 4 ? "d " : "  ");
-        printString( players[3] >= 3 ? "d " : "  ");
+        printString(players[3] >= 4 ? "d " : "  ");
+        printString(players[3] >= 3 ? "d " : "  ");
         printSpace(4);
         printPawn(38);
         printSpace(1);
@@ -293,20 +333,20 @@ public class ImperativeChinesseGuy {
         printPawn(0);
         printSpace(1);
         printSpace(4);
-        printString( players[0] >= 3 ? "a " : "  ");
-        printString( players[0] >= 4 ? "a " : "  ");
+        printString(players[0] >= 3 ? "a " : "  ");
+        printString(players[0] >= 4 ? "a " : "  ");
         System.out.println();
         printSpace(3);
-        printString( players[3] >= 2 ? "d " : "  ");
-        printString( players[3] >= 1 ? "d " : "  ");
+        printString(players[3] >= 2 ? "d " : "  ");
+        printString(players[3] >= 1 ? "d " : "  ");
         printSpace(4);
         printPawn(37);
         printSpace(3);
         printPawn(1);
         printSpace(1);
         printSpace(4);
-        printString( players[0] >= 1 ? "a " : "  ");
-        printString( players[0] >= 2 ? "a " : "  ");
+        printString(players[0] >= 1 ? "a " : "  ");
+        printString(players[0] >= 2 ? "a " : "  ");
         System.out.println();
         printSpace(11);
         printPawn(36);
@@ -382,19 +422,19 @@ public class ImperativeChinesseGuy {
         printPawn(16);
         System.out.println();
         printSpace(3);
-        printString( players[2] >= 2 ? "c " : "  ");
-        printString( players[2] >= 1 ? "c " : "  ");
+        printString(players[2] >= 2 ? "c " : "  ");
+        printString(players[2] >= 1 ? "c " : "  ");
         printSpace(4);
         printPawn(21);
         printSpace(3);
         printPawn(17);
         printSpace(5);
-        printString( players[1] >= 1 ? "b " : "  ");
-        printString( players[1] >= 2 ? "b " : "  ");
+        printString(players[1] >= 1 ? "b " : "  ");
+        printString(players[1] >= 2 ? "b " : "  ");
         System.out.println();
         printSpace(3);
-        printString( players[2] >= 4 ? "c " : "  ");
-        printString( players[2] >= 3 ? "c " : "  ");
+        printString(players[2] >= 4 ? "c " : "  ");
+        printString(players[2] >= 3 ? "c " : "  ");
         printSpace(4);
         printPawn(20);
         printSpace(1);
@@ -402,8 +442,8 @@ public class ImperativeChinesseGuy {
         printSpace(1);
         printPawn(18);
         printSpace(5);
-        printString( players[1] >= 3 ? "b " : "  ");
-        printString( players[1] >= 4 ? "b " : "  ");
+        printString(players[1] >= 3 ? "b " : "  ");
+        printString(players[1] >= 4 ? "b " : "  ");
         System.out.println();
         printSpace(11);
         printString("20");
